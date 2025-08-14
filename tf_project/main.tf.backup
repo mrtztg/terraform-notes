@@ -1,0 +1,22 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "aws" {
+	region = "eu-west-2"
+  profile = "terraform"
+}
+
+#resource "aws_s3_bucket" "practice_bucket" {
+#	bucket = "morypracticebucket"
+#}
+
+resource "aws_instance" "practice_ec2 {
+  ami = "ami-051fd0ca694aa2379"
+  instance_type= "t3.micro"
+}
