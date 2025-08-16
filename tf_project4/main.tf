@@ -177,12 +177,12 @@ resource "aws_lb_target_group" "alb_tg" {
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.default_vpc.id
   health_check {
-    enabled = true
-    path = "/"
-    port = 8080
+    enabled  = true
+    path     = "/"
+    port     = 8080
     protocol = "HTTP"
     interval = "10"
-    timeout = 3
+    timeout  = 3
   }
 }
 
@@ -227,16 +227,41 @@ resource "aws_lb_listener" "alb_listener" {
 
 resource "aws_lb_listener_rule" "index_page" {
   listener_arn = aws_lb_listener.alb_listener.arn
-  priority = 100
+  priority     = 100
   action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.alb_tg.arn
   }
   condition {
     path_pattern {
-      values = [ "/" ]
+      values = ["/"]
     }
   }
+  tags = {
+    purpose = "practice"
+  }
+}
+
+resource "aws_route53_zone" "primary" {
+  name = "10hidmort.xyz"
+  tags = {
+    purpose = "practice"
+  }
+}
+
+resource "aws_route53_record" "root" {
+  zone_id = aws_route53_zone.primary.id
+  name    = "alb.10hidmort.xyz"
+  type    = "A"
+  alias {
+    name                   = aws_lb.alb.dns_name
+    zone_id                = aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
+}
+
+output "domain_nameservers" {
+  value = aws_route53_zone.primary.name_servers
 }
 
 ### S3 Bucket
