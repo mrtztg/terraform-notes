@@ -66,7 +66,6 @@ resource "aws_instance" "ec2_instance_2" {
 }
 
 ### Security Groups
-
 data "aws_vpc" "default_vpc" {
   default = true
 }
@@ -288,5 +287,25 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
+  }
+}
+
+### RDS Instance
+
+data "aws_rds_engine_version" "db_cluster" {
+  engine = "postgres"
+}
+
+resource "aws_db_instance" "db" {
+  allocated_storage   = 10
+  db_name             = "mypostgres"
+  engine              = "postgres"
+  engine_version      = data.aws_rds_engine_version.db_cluster.version
+  instance_class      = "db.t3.micro"
+  username            = "mydb"
+  password            = "ThisIsMyStrongPassword"
+  skip_final_snapshot = true
+  tags = {
+    purpose = "practice"
   }
 }
