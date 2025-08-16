@@ -8,7 +8,7 @@ terraform {
 
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 6.0"
     }
   }
@@ -21,19 +21,19 @@ provider "aws" {
 
 data "aws_ami" "ubuntu" {
   most_recent = true
-  
+
   filter {
-    name = "name"
-    values = [ "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" ]
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
 
-  owners = [ "099720109477" ] # Canonical
+  owners = ["099720109477"] # Canonical
 }
 
-resource "aws_instance" "tf4_ec2" {
-  ami = data.aws_ami.ubuntu.id
+resource "aws_instance" "ec2_instance_1" {
+  ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
-  tenancy = "default"
+  tenancy       = "default"
 
   user_data = <<-EOF
             #!/bin/bash
@@ -46,15 +46,9 @@ resource "aws_instance" "tf4_ec2" {
   }
 }
 
-data "aws_vpc" "default_vpc" {
-  default = true
-}
-
-data
-
-resource "aws_instance" "tf4_ec2_2" {
-  ami = data.aws_ami.ubuntu.id
-  tenancy = "default"
+resource "aws_instance" "ec2_instance_2" {
+  ami           = data.aws_ami.ubuntu.id
+  tenancy       = "default"
   instance_type = "t3.nano"
 
   user_data = <<-EOF
@@ -62,26 +56,72 @@ resource "aws_instance" "tf4_ec2_2" {
               echo 'Hello world 2" > index.html
               python3 -m http.server 8080 &
               EOF
+
+  tags = {
+    purpose = "practice"
+  }
 }
 
-resource "aws_s3_bucket" "tf4_s3" {
-  bucket = "morytf4bucket"
+resource "aws_s3_bucket" "bucket" {
+  bucket        = "morytf4bucket"
   force_destroy = true
   tags = {
     purpose = "practice"
   }
 }
 
-resource "aws_s3_bucket_versioning" "tf4_s3_versioning" {
-  bucket = aws_s3_bucket.tf4_s3.id
-  
+data "aws_vpc" "default_vpc" {
+  default = true
+}
+
+resource "aws_security_group" "ec2_sg" {
+  name        = "allow_alb"
+  vpc_id      = data.aws_vpc.default_vpc.id
+  description = "Allow traffic from ALB"
+
+  tags = {
+    purpose = "practice"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "ec2_sg_inbound_ipv4" {
+  security_group_id = aws_security_group.ec2_sg.id
+  ip_protocol = "tcp"
+  from_port = 8080
+  to_port = 8080
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "ec2_sg_inbound_ipv6" {
+  security_group_id = aws_security_group.ec2_sg.id
+  ip_protocol = "tcp"
+  from_port = 8080
+  to_port = 8080
+  cidr_ipv6 = "::/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "ec2_sg_outbound_ipv4" {
+  security_group_id = aws_security_group.ec2_sg.id
+  ip_protocol = "-1"
+  cidr_ipv4 = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "ec2_sg_outbound_ipv6" {
+  security_group_id = aws_security_group.ec2_sg.id
+  ip_protocol = "-1"
+  cidr_ipv6 = "::/0"
+}
+
+resource "aws_s3_bucket_versioning" "bucket_versioning" {
+  bucket = aws_s3_bucket.bucket.id
+
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "tf4_s3_encryption" {
-  bucket = aws_s3_bucket.tf4_s3.id
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_encryption" {
+  bucket = aws_s3_bucket.bucket.id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
