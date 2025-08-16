@@ -1,50 +1,34 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 6.0"
     }
   }
 }
 
 provider "aws" {
-  region = "eu-west-2"
+  region  = "eu-west-2"
   profile = "terraform"
 }
 
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "morytsstate"
+resource "aws_s3_bucket" "tf_state" {
+  bucket        = "morytfstate"
   force_destroy = true
-  versioning {
-    enabled = true
-  }
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-          sse_algorithm = "AES256"
-      }
+resource "aws_s3_bucket_server_side_encryption_configuration" "tf_state_encryption" {
+  bucket = aws_s3_bucket.tf_state.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
 }
 
-#resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
-#  bucket = "practicetfstate"
-#  
-#  rule {
-#    apply_server_side_encryption_by_default {
-#      sse_algorithm = "AES256"
-#    }
-#  }
-#}
-
-
-resource "aws_dynamodb_table" "terraform_locks" {
-  name = "tf-state-locking"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key = "myStrongHashKey"
-  attribute {
-    name = "myStrongHashKey"
-    type = "S"
+resource "aws_s3_bucket_versioning" "tf_state_versioning" {
+  bucket = aws_s3_bucket.tf_state.id
+  versioning_configuration {
+    status = "Enabled"
   }
 }

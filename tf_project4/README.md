@@ -1,0 +1,11 @@
+### Web app TF Config
+ - backend + provider config
+ - EC2 instances
+ - S3 bucket
+ - VPC
+   - Subnet
+ - Security groups + rules
+ - Application Load balancer
+   - ALB target group + attachment
+ - Route 53 + record
+ - RDS Instance
