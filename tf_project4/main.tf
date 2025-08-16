@@ -172,10 +172,18 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_target_group" "alb_tg" {
-  name        = "tfalbtg"
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = data.aws_vpc.default_vpc.id
+  name     = "tfalbtg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.default_vpc.id
+  health_check {
+    enabled = true
+    path = "/"
+    port = 8080
+    protocol = "HTTP"
+    interval = "10"
+    timeout = 3
+  }
 }
 
 resource "aws_lb_target_group_attachment" "alb_tg_attach_ec2_1" {
@@ -192,18 +200,42 @@ resource "aws_lb_target_group_attachment" "alb_tg_attach_ec2_2" {
   depends_on       = [aws_lb_target_group.alb_tg, aws_instance.ec2_instance_2]
 }
 
-resource "aws_lb_listener" "alb_all_route_listener" {
+resource "aws_lb_listener" "alb_listener" {
   load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
 
+  # default_action {
+  #   type             = "forward"
+  #   target_group_arn = aws_lb_target_group.alb_tg.arn
+  # }
+
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.alb_tg.arn
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found!!"
+      status_code  = "404"
+    }
   }
-  depends_on = [ aws_lb.alb, aws_lb_target_group.alb_tg ]
+
+  depends_on = [aws_lb.alb, aws_lb_target_group.alb_tg]
   tags = {
     purpose = "practice"
+  }
+}
+
+resource "aws_lb_listener_rule" "index_page" {
+  listener_arn = aws_lb_listener.alb_listener.arn
+  priority = 100
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg.arn
+  }
+  condition {
+    path_pattern {
+      values = [ "/" ]
+    }
   }
 }
 
