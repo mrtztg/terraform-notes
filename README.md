@@ -1,6 +1,58 @@
 # Raw notes/practice
+
 - Install Terraform
 - Provision AWS EC2 insatnce
-- Mind about state file, 'resources' and 'data' section in it. Also secure it, since it'll have sensitive data inside like credentials.
+- Mind about state file, 'resources' and 'data' section in it. Also secure it, since it'll have sensitive data inside
+  like credentials.
 - `.terraform` directory
 - `init`, `plan`, `apply` and `destroy` commands of terraform
+- Input Variables:
+    - Manual entry during plan/apply (if none of the below been set)
+    - Default value in declaration block
+    - `TF_VAR_<name>` environment variable
+    - `terraform.tfvars` file
+    - `*.auto.tfvars` file
+    - Command like `-var` or `-var-file`
+- Local Variables:
+    - We define them in each terraform files like `local {<attr-name> = <attr-value> , ...}`
+    - Then use like `local.<attr-name>`
+- Types:
+    - string
+    - number
+    - bool
+    - list(<type>)
+    - set(<type>)
+    - map(<type>)
+    - object({<attr-name> = <type>, ...})
+    - tuple([<type>, ...])
+- Validation:
+    - Type checking happens automatically
+    - Custom conditions
+- Sensitive data
+    - `sensitive = true` to mark variable as sensitive
+    - `TF_VAR_variale` or `-var` (retrieved from secret manager at runtime) to pass Terraform
+    - Terraform will mark this data in *Plan* and *Apply* explanation
+- Expressions
+    - Template strings (like `ID: ${var.id}`)
+    - Operators (`!,-,*,/,%,>,==`, etc)
+    - Conditions (`cond ? true : false`)
+    - For (`[for o in var.list : o.id]`)
+    - Splat (`var.list[*].id`)
+    - Dynamic Blocks
+    - Constraints (Type & Version)
+- Functions
+  - Numeric (like math functions)
+  - String
+  - Collection
+  - Encoding
+  - Filesystem
+  - Date & Time
+  - Hash & Crypto
+  - IP Network
+  - Type Conversion
+- Meta-Arguments:
+  - `depends_on`
+    - Terraform knows the which resources depends on which and follows the proper order of config.
+    - But there are scenarios 2 resources depends on each other, but there is no direct connection within the config. For example, we know our application in te EC2 instance need S3 access, but the TF config doesn't know this. So, we should use `depends_on` in EC2 to say that IAM role should be created before this EC2 instance.
+  - `count`
+    - It says how many copies of this resource to create
