@@ -75,9 +75,17 @@
     - Local paths, Terraform Registry, Github, Bitbucket, Generic Git and Mercurial repos, HTTP URLs, S3 Buckets, GCS buckets
   - Child Modules can have access to things from parent module or even siblings, like their variables.
   - What makes a Good module?
-    - Doesn't just separated by resource type.
+    - Doesn't just separate by resource type.
     - Group resources in a logical manner. Like "game module" or "analytics module"
     - Provide useful defaults
     - Expose input values to allow necessary customization + composition. For example, domain name, ec2 instance type, db name, so on better to exposed
     - Return outputs to make further integrations possible
-    - 
+- Two approaches for having multiple environments (like dev, prod) with one config:
+
+|      | Workspaces                                                                                                                                                                       | File Structure                                                                                                                     |
+|------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| Pros | Easy to get started<br>Convenient `terraform.workspace` expression<br>Minimizes code duplication                                                                                 | Isolation of backends:<br>- Improved security<br>- Decreased potential for human error<br>Codebase fully represents deployed state |
+| Cons | Prone to human error (especially when you do manual changes on infra)<br>All states stored withing same backend<br>Codebase doesn't unambiguously show deployment configurations | Multiple `terraform apply` required to provision environments<br>Mor code duplication, but can be minimized with modules!          |
+
+    - We also can use `Terragunt`
+
