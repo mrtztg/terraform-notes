@@ -265,7 +265,6 @@ resource "aws_lb_listener_rule" "index_page" {
 # }
 
 ### S3 Bucket
-
 resource "aws_s3_bucket" "bucket" {
   bucket        = var.s3_bucket_name
   force_destroy = true

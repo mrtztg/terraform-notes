@@ -78,5 +78,6 @@
     - Doesn't just separated by resource type.
     - Group resources in a logical manner. Like "game module" or "analytics module"
     - Provide useful defaults
-    - Expose input values to allow necessary customization + composition
+    - Expose input values to allow necessary customization + composition. For example, domain name, ec2 instance type, db name, so on better to exposed
     - Return outputs to make further integrations possible
+    - 
