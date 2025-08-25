@@ -33,8 +33,8 @@ variable "ec2_port" {
 }
 
 variable "s3_bucket_name" {
-  type    = string
-  default = "Name of s3 bucket"
+  type        = string
+  description = "Name of s3 bucket"
 }
 
 variable "db_config" {
@@ -51,4 +51,12 @@ variable "db_credentials" {
     username = string,
     password = string
   })
+}
+
+variable "alb_security_group_name" {
+  type = string
+}
+
+variable "ec2_security_group_name" {
+  type = string
 }

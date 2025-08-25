@@ -33,8 +33,8 @@ variable "ec2_port" {
 }
 
 variable "s3_bucket_name" {
-  type    = string
-  default = "Name of s3 bucket"
+  type        = string
+  description = "Name of s3 bucket"
 }
 
 variable "db_config" {
@@ -51,4 +51,21 @@ variable "db_credentials" {
     username = string,
     password = string
   })
+}
+
+variable "module_prefix" {
+  type = string
+  description = "This will be used as prefix for the resources that need name"
+}
+
+variable "create_dns_done" {
+  type = bool
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "domain" {
+  type = string
 }
